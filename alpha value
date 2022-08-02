@@ -24,3 +24,7 @@ plt.title("Graph of difusivity constant versus time, using equations from Thermp
 plt.xlabel("Temperature (Kelvin)")
 plt.ylabel("value of heat diffusivity constant")
 plt.show()
+
+
+print(sum(y)/50)
+# = 2.2889159668865825e-08, which we use as our alpha value.
