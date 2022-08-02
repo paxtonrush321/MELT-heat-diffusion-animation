@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug  2 14:08:31 2022
+
+@author: paxtonrush
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import sys
+
+h = 50
+l = 50
+a = 2
+
+max_time = 161
+dx = 1
+dt = dx**2/(4*a)
+G = (a*dt)/(dx**2)
+T = np.empty((max_time, h, l))
+
+T_initial = 0
+T_top = T_initial
+T_bottom = T_initial
+T_left = T_initial
+T_right = T_initial
+
+T.fill(T_initial)
+T[:, (h-1):, :] = T_top
+T[:, :1, 1:] = T_bottom
+T[:, :, :1] = T_left
+T[:, :, (l-1):] = T_right
+clicked_points = []
+
+x = 25
+y = 25
+
+t_point = 100
+t_click = 150
+
+T[:, x-1:x+1, y-1:y+1] = t_point
+
+def onclick(event):
+    global clicked_points
+    print('clicked')
+    clicked_points.append([int(event.xdata), int(event.ydata)])
+    T[:, int(event.ydata)-1:int(event.ydata)+1, int(event.xdata)-1:int(event.xdata)+1] = t_click
+    
+
+def heat_equation(u, k):
+        for i in range(1, h-1, dx):
+            for j in range(1, l-1, dx):
+                if not([j, i] in clicked_points):
+                    u[k+1, i, j] = G*(u[k][i+1][j]+u[k][i-1][j]+u[k][i][j+1]+u[k][i][j-1] - 4*u[k][i][j]) + u[k][i][j]
+
+def plotheatmap(T_k, k):
+    plt.clf()
+    plt.title(f"Temperature at = {k*dt:3f} unit time")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.pcolormesh(T_k, cmap=plt.cm.turbo, vmin=0, vmax=T.max(), shading='gouraud')
+    plt.colorbar()
+    return plt    
+
+fig = plt.figure()
+fig.set_figheight(h*0.1)
+fig.set_figwidth(l*0.125)
+def animate(k):
+    heat_equation(T, k)
+    plotheatmap(T[k], k)
+
+anim = animation.FuncAnimation(fig, animate, interval=1, frames=max_time, repeat=False) 
+cid = fig.canvas.mpl_connect('button_press_event', onclick)
+
+print('Calculations done')
+plt.show()
+
+anim.save("heat_equation_final.gif")
+print("Plot done")
